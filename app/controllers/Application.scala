@@ -29,7 +29,7 @@ object Application extends Controller {
     }).map(_.flatten)
 
     fentries.map { entries =>
-      val displayedEntries: immutable.Seq[Entry] = entries.sortWith((a, b) => a.published.isAfter(b.published)).take(15)
+      val displayedEntries: immutable.Seq[Entry] = entries.sortWith((a, b) => a.published.isAfter(b.published)).take(50)
 
       val xml: Elem = makeRss(displayedEntries)
 
