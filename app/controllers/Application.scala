@@ -1,15 +1,17 @@
 package controllers
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import javax.xml.parsers.SAXParser
 import play.api.mvc._
 import play.api.libs.ws.{WS, WSResponse}
 import play.api.Play.current
+import play.api.libs.json.Json
 
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 import scala.xml.{Elem, Node, NodeSeq}
 
 object Application extends Controller {
@@ -19,7 +21,7 @@ object Application extends Controller {
     val opml: Elem = scala.xml.XML.loadFile("conf/subscription_manager.xml")
     val outlines: NodeSeq = (opml \ "body" \ "outline" \ "outline")
 
-    val fentries: Future[immutable.Seq[Entry]] = Future.sequence(outlines.dropRight(50).map { outline =>
+    val fentries: Future[immutable.Seq[Entry]] = Future.sequence(outlines.map { outline =>
       val rssUrl: String = outline \@ "xmlUrl"
 
       val entries: Future[Seq[Entry]] = getEntries(rssUrl)
@@ -27,7 +29,11 @@ object Application extends Controller {
     }).map(_.flatten)
 
     fentries.map { entries =>
-      Ok(entries.map(_.toString).mkString("\n"))
+      val displayedEntries: immutable.Seq[Entry] = entries.sortWith((a, b) => a.published.isAfter(b.published)).take(15)
+
+      val xml: Elem = makeRss(displayedEntries)
+
+      Ok(xml)
     }
   }
 
@@ -39,19 +45,59 @@ object Application extends Controller {
       val entriesXml: NodeSeq = (scala.xml.XML.loadString(body) \ "entry")
 
       val entries: Seq[Entry] = entriesXml.theSeq.map { entryXml: Node =>
+
+        val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val published = LocalDateTime.parse((entryXml \ "published").text, dtf)
+        val updated = LocalDateTime.parse((entryXml \ "updated").text, dtf)
+
         Entry(
           (entryXml \ "title").text,
           (entryXml \ "link" \@ "href"),
           (entryXml \ "author" \ "name").text,
           (entryXml \ "media:group" \ "media:thumbnail" \@ "url"),
-          (entryXml \ "published").text,
-          (entryXml \ "updated").text
+          published,
+          updated
         )
       }
 
       Console.println(rssUrl+" : "+entries.size)
       entries
+    }.recover {
+      case NonFatal(e) => {
+        Console.println("Following error occured while parsing "+rssUrl+" : "+e.getMessage)
+        e.printStackTrace()
+        Seq.empty
+      }
     }
+  }
+
+  def makeRss(entries: Seq[Entry]): Elem = {
+
+    val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+
+    val entriesString = entries.map { e =>
+      """
+                  <item>
+                    <title>["""+ e.authorName +"""] """+ e.title +"""</title>
+                    <link>"""+e.url+"""</link>
+                    <description>"""+e.title+"""</description>
+                  </item>
+      """.stripMargin
+    }.mkString("")
+
+    val xml: String = """<rss version="2.0">
+        <channel>
+          <title>Mes abos YouTube</title>
+          <link>https://www.youtube.com/feed/subscriptions</link>
+          <description>Mes abos YouTube</description>
+          <lastBuildDate>Fri, 08 Mar 2019 17:16:01 +0000</lastBuildDate>
+          <language>fr-FR</language>
+          """ + entriesString + """
+        </channel>
+      </rss>
+      """
+
+    scala.xml.XML.loadString(xml)
   }
 
   def indexHtml = Action {
@@ -63,5 +109,6 @@ case class Entry(title: String,
                  url: String,
                  authorName: String,
                  thumbnail: String,
-                 published: String,
-                 updated: String)
+                 published: LocalDateTime,
+                 updated: LocalDateTime)
+
