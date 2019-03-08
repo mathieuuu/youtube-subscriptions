@@ -27,7 +27,7 @@ object Application extends Controller {
     }).map(_.flatten)
 
     fentries.map { entries =>
-      Ok(entries.size.toString)
+      Ok(entries.map(_.toString).mkString("\n"))
     }
   }
 
