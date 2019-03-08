@@ -31,7 +31,7 @@ object Application extends Controller {
     fentries.map { entries =>
       val displayedEntries: immutable.Seq[Entry] = entries.sortWith((a, b) => a.published.isAfter(b.published)).take(50)
 
-      val xml: Elem = makeRss(displayedEntries)
+      val xml = makeRss(displayedEntries)
 
       Ok(xml)
     }
@@ -54,7 +54,7 @@ object Application extends Controller {
           (entryXml \ "title").text,
           (entryXml \ "link" \@ "href"),
           (entryXml \ "author" \ "name").text,
-          (entryXml \ "media:group" \ "media:thumbnail" \@ "url"),
+          (entryXml \ "group" \ "thumbnail" \@ "url"),
           published,
           updated
         )
@@ -71,7 +71,7 @@ object Application extends Controller {
     }
   }
 
-  def makeRss(entries: Seq[Entry]): Elem = {
+  def makeRss(entries: Seq[Entry]) = {
 
     val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
@@ -81,6 +81,12 @@ object Application extends Controller {
                     <title>["""+ e.authorName +"""] """+ e.title +"""</title>
                     <link>"""+e.url+"""</link>
                     <description>"""+e.title+"""</description>
+                    <media:content url=""""+e.thumbnail+"""" width="" height="" medium="image">
+                    <media:media_html><![CDATA[]]></media:media_html>
+                    <dc:identifier><![CDATA[1]]></dc:identifier>
+                    <media:credit><![CDATA[]]></media:credit>
+                    <media:description><![CDATA[]]></media:description>
+                    <media:title><![CDATA[]]></media:title></media:content>
                   </item>
       """.stripMargin
     }.mkString("")
@@ -96,8 +102,7 @@ object Application extends Controller {
         </channel>
       </rss>
       """
-
-    scala.xml.XML.loadString(xml)
+xml
   }
 
   def indexHtml = Action {
