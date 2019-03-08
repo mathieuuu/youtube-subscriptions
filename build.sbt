@@ -1,4 +1,4 @@
-name := """play-getting-started"""
+name := """youtube-subscriptions"""
 
 version := "1.0-SNAPSHOT"
 
