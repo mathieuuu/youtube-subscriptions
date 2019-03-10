@@ -76,27 +76,27 @@ object Application extends Controller {
 
     val entriesString = entries.map { e =>
       """<item>
-                    <title>["""+ e.authorName +"""] """+ e.title +"""</title>
-                    <link>"""+e.url+"""</link>
-                    <description></description>
+                    <title><![CDATA[""".stripMargin+e.title+"""]]></title>
+                    <link>""".stripMargin+e.url+"""</link><description></description>
                     <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
                     <pubDate>"""+dtf.format(e.published)+"""</pubDate>
-                  </item>
+         </item>
       """.stripMargin
     }.mkString("")
 
-    val xml: String = """<rss version="2.0">
+    val xml: String = """<?xml version="1.0" encoding="UTF-8"?>
+      <rss version="2.0">
         <channel>
           <title>Mes abos YouTube</title>
           <link>https://www.youtube.com/feed/subscriptions</link>
-          <description>Mes abos YouTube</description>à
+          <description>Mes abos YouTube</description>
           <language>fr-FR</language>
           """ + entriesString + """
         </channel>
       </rss>
       """
 
-    xml
+    scala.xml.XML.loadString(xml)
   }
 
   def indexHtml = Action {
