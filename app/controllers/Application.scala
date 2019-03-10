@@ -81,17 +81,17 @@ object Application extends Controller {
                     <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
                     <pubDate>"""+dtf.format(e.published)+"""</pubDate>
          </item>
-      """.stripMargin
+      """
     }.mkString("")
 
     val xml: String = """<?xml version="1.0" encoding="UTF-8"?>
       <rss version="2.0">
         <channel>
-          <title>Mes abos YouTube</title>
-          <link>https://www.youtube.com/feed/subscriptions</link>
-          <description>Mes abos YouTube</description>
-          <language>fr-FR</language>
-          """ + entriesString + """
+                    <title>Mes abos YouTube</title>
+                    <link>https://www.youtube.com/feed/subscriptions</link>
+                    <description>Mes abos YouTube</description>
+                    <language>fr-FR</language>
+                    """ + entriesString + """
         </channel>
       </rss>
       """
