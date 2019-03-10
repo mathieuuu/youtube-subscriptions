@@ -76,7 +76,7 @@ object Application extends Controller {
 
     val entriesString = entries.map { e =>
       """<item>
-                    <title><![CDATA[""".stripMargin+e.title+"""]]></title>
+                    <title><![CDATA[["""+ e.authorName +"""] """+ e.title +"""]]></title>
                     <link>""".stripMargin+e.url+"""</link><description></description>
                     <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
                     <pubDate>"""+dtf.format(e.published)+"""</pubDate>
