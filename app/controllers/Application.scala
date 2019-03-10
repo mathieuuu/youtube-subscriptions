@@ -89,8 +89,7 @@ object Application extends Controller {
         <channel>
           <title>Mes abos YouTube</title>
           <link>https://www.youtube.com/feed/subscriptions</link>
-          <description>Mes abos YouTube</description>
-          <lastBuildDate>Fri, 08 Mar 2019 17:16:01 +0000</lastBuildDate>
+          <description>Mes abos YouTube</description>à
           <language>fr-FR</language>
           """ + entriesString + """
         </channel>
