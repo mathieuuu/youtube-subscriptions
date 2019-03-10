@@ -76,17 +76,11 @@ object Application extends Controller {
     val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
 
     val entriesString = entries.map { e =>
-      """
-                  <item>
+      """<item>
                     <title>["""+ e.authorName +"""] """+ e.title +"""</title>
                     <link>"""+e.url+"""</link>
                     <description>"""+e.title+"""</description>
-                    <media:content url=""""+e.thumbnail+"""" width="" height="" medium="image">
-                    <media:media_html><![CDATA[]]></media:media_html>
-                    <dc:identifier><![CDATA[1]]></dc:identifier>
-                    <media:credit><![CDATA[]]></media:credit>
-                    <media:description><![CDATA[]]></media:description>
-                    <media:title><![CDATA[]]></media:title></media:content>
+                    <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
                   </item>
       """.stripMargin
     }.mkString("")
@@ -102,7 +96,8 @@ object Application extends Controller {
         </channel>
       </rss>
       """
-xml
+
+    xml
   }
 
   def indexHtml = Action {
