@@ -98,10 +98,6 @@ object Application extends Controller {
 
     scala.xml.XML.loadString(xml)
   }
-
-  def indexHtml = Action {
-    Ok(views.html.index(null))
-  }
 }
 
 case class Entry(title: String,
