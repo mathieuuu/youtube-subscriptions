@@ -79,7 +79,7 @@ object Application extends Controller {
       """<item>
                     <title>["""+ e.authorName +"""] """+ e.title +"""</title>
                     <link>"""+e.url+"""</link>
-                    <description>"""+e.title+"""</description>
+                    <description></description>
                     <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
                   </item>
       """.stripMargin
