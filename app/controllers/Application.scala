@@ -1,12 +1,11 @@
 package controllers
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
-import play.api.mvc._
-import play.api.libs.ws.{WS, WSResponse}
 import play.api.Play.current
-import play.api.libs.json.Json
+import play.api.libs.ws.{WS, WSResponse}
+import play.api.mvc._
 
 import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,8 +46,8 @@ object Application extends Controller {
       val entries: Seq[Entry] = entriesXml.theSeq.map { entryXml: Node =>
 
         val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-        val published = LocalDateTime.parse((entryXml \ "published").text, dtf)
-        val updated = LocalDateTime.parse((entryXml \ "updated").text, dtf)
+        val published = ZonedDateTime.parse((entryXml \ "published").text, dtf)
+        val updated = ZonedDateTime.parse((entryXml \ "updated").text, dtf)
 
         Entry(
           (entryXml \ "title").text,
@@ -73,7 +72,7 @@ object Application extends Controller {
 
   def makeRss(entries: Seq[Entry]) = {
 
-    val dtf: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+    val dtf: DateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
 
     val entriesString = entries.map { e =>
       """<item>
@@ -81,6 +80,7 @@ object Application extends Controller {
                     <link>"""+e.url+"""</link>
                     <description></description>
                     <enclosure type="image/jpg" url=""""+e.thumbnail+""""/>
+                    <pubDate>"""+dtf.format(e.published)+"""</pubDate>
                   </item>
       """.stripMargin
     }.mkString("")
@@ -108,6 +108,6 @@ case class Entry(title: String,
                  url: String,
                  authorName: String,
                  thumbnail: String,
-                 published: LocalDateTime,
-                 updated: LocalDateTime)
+                 published: ZonedDateTime,
+                 updated: ZonedDateTime)
 
